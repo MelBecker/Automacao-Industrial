@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FENYX ACESSO</title>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- Menu lateral -->
+        <aside class="sidebar">
+
+            <div class="logo">
+                <h1>FENYX</h1>
+                <span>ACESSO</span>
+            </div>
+
+            <nav>
+                <ul>
+                    <li><a href="#">Início</a></li>
+                    <li><a href="#">Pesquisar</a></li>
+                    <li><a href="#">Visitantes</a></li>
+                    <li><a href="#">Relatórios</a></li>
+                    <li><a href="#">Configurações</a></li>
+                </ul>
+            </nav>
+
+        </aside>
+
+        <!-- Conteúdo principal -->
+        <main class="content">
+
+            <!-- Cabeçalho -->
+            <header class="topbar">
+
+                <h2>ACESSOS</h2>
+
+                <div class="topbar-info">
+                    <div class="date-time">
+                        <span>25/05/2025 14:25</span>
+                    </div>
+
+                    <div class="user">
+                        <span>USUÁRIO</span>
+                    </div>
+                </div>
+
+            </header>
+
+            <!-- Tabela -->
+            <section class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>NOME</th>
+                            <th>DOCUMENTO</th>
+                            <th>TIPO</th>
+                            <th>ENTRADA</th>
+                            <th>SAÍDA</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr>
+                            <td>Guilherme</td>
+                            <td>125034439</td>
+                            <td>R.A</td>
+                            <td>3º A</td>
+                            <td>14:25</td>
+                        </tr>
+
+                        <tr>
+                            <td>Mariana</td>
+                            <td>125034440</td>
+                            <td>R.A</td>
+                            <td>3º A</td>
+                            <td>14:24</td>
+                        </tr>
+
+                        <tr>
+                            <td>Mel</td>
+                            <td>125034441</td>
+                            <td>R.A</td>
+                            <td>3º A</td>
+                            <td>14:23</td>
+                        </tr>
+
+                        <tr>
+                            <td>Gabriel</td>
+                            <td>125034442</td>
+                            <td>R.A</td>
+                            <td>3º A</td>
+                            <td>14:22</td>
+                        </tr>
+
+                        <tr>
+                            <td>Melissa</td>
+                            <td>125034443</td>
+                            <td>R.A</td>
+                            <td>3º A</td>
+                            <td>14:21</td>
+                        </tr>
+
+                        <tr>
+                            <td>João F.</td>
+                            <td>125034444</td>
+                            <td>R.A</td>
+                            <td>3º A</td>
+                            <td>14:20</td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</body>
+</html>
