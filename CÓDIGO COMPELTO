@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fenyx Acesso — Controle de Acesso Biométrico</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --red-primary: #C8151B;
+    --red-dark: #A01015;
+    --red-light: #E8303A;
+    --red-pale: #FEF2F2;
+    --red-border: #FECACA;
+    --white: #FFFFFF;
+    --gray-50: #F9FAFB;
+    --gray-100: #F3F4F6;
+    --gray-200: #E5E7EB;
+    --gray-300: #D1D5DB;
+    --gray-400: #9CA3AF;
+    --gray-500: #6B7280;
+    --gray-600: #4B5563;
+    --gray-700: #374151;
+    --gray-900: #111827;
+    --green: #16A34A;
+    --green-light: #DCFCE7;
+    --amber: #D97706;
+    --amber-light: #FEF3C7;
+    --sidebar-w: 220px;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 16px rgba(0,0,0,.06);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--gray-100);
+    color: var(--gray-900);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ─── SIDEBAR ─── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--red-primary);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: 0 0 24px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .sidebar-logo {
+    padding: 28px 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,.15);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .logo-icon svg { width: 24px; height: 24px; }
+
+  .logo-text { color: var(--white); }
+  .logo-text .brand { font-size: 15px; font-weight: 800; letter-spacing: .5px; }
+  .logo-text .sub { font-size: 10px; font-weight: 500; letter-spacing: 1.5px; opacity: .7; text-transform: uppercase; }
+
+  .sidebar-nav { padding: 16px 12px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 12px;
+    border-radius: 10px;
+    color: rgba(255,255,255,.75);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .2px;
+    text-decoration: none;
+  }
+
+  .nav-item:hover { background: rgba(255,255,255,.12); color: var(--white); }
+  .nav-item.active { background: var(--white); color: var(--red-primary); font-weight: 600; }
+  .nav-item.active svg { stroke: var(--red-primary); }
+  .nav-item svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+
+  .nav-section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.4);
+    padding: 16px 12px 6px;
+  }
+
+  .sidebar-bottom {
+    padding: 0 12px;
+    border-top: 1px solid rgba(255,255,255,.15);
+    padding-top: 16px;
+    margin: 0 0 0;
+  }
+
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background .15s;
+  }
+
+  .sidebar-user:hover { background: rgba(255,255,255,.1); }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .user-info .name { font-size: 13px; font-weight: 600; color: white; }
+  .user-info .role { font-size: 11px; color: rgba(255,255,255,.55); }
+
+  /* ─── MAIN ─── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ─── TOPBAR ─── */
+  .topbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 0 28px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+
+  .page-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--red-primary);
+    letter-spacing: -.3px;
+  }
+
+  .breadcrumb { font-size: 13px; color: var(--gray-400); }
+
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+
+  .clock-widget {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+  }
+
+  .clock-widget svg { width: 16px; height: 16px; stroke: var(--gray-400); fill: none; }
+  .clock-time { font-size: 13px; font-weight: 600; color: var(--gray-700); }
+  .clock-date { font-size: 12px; color: var(--gray-400); }
+
+  .biometric-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    background: var(--green-light);
+    border: 1px solid #BBF7D0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .4; }
+  }
+
+  .notif-btn {
+    position: relative;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--gray-200);
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .15s;
+  }
+
+  .notif-btn:hover { background: var(--gray-50); }
+  .notif-btn svg { width: 18px; height: 18px; stroke: var(--gray-500); fill: none; }
+  .notif-badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    width: 16px; height: 16px;
+    background: var(--red-primary);
+    border-radius: 50%;
+    border: 2px solid white;
+    font-size: 9px;
+    color: white;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ─── CONTENT ─── */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px;
+  }
+
+  /* ─── VIEWS ─── */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ─── STATS GRID ─── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--red-primary);
+    border-radius: 3px 3px 0 0;
+  }
+
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.amber::before { background: var(--amber); }
+  .stat-card.blue::before { background: #3B82F6; }
+
+  .stat-label { font-size: 12px; font-weight: 500; color: var(--gray-500); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 8px; }
+  .stat-value { font-size: 28px; font-weight: 800; color: var(--gray-900); letter-spacing: -1px; }
+  .stat-sub { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+
+  .stat-icon {
+    position: absolute;
+    top: 18px; right: 18px;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .stat-icon.red { background: var(--red-pale); }
+  .stat-icon.green { background: var(--green-light); }
+  .stat-icon.amber { background: var(--amber-light); }
+  .stat-icon.blue { background: #EFF6FF; }
+
+  .stat-icon svg { width: 18px; height: 18px; fill: none; stroke-width: 2; }
+  .stat-icon.red svg { stroke: var(--red-primary); }
+  .stat-icon.green svg { stroke: var(--green); }
+  .stat-icon.amber svg { stroke: var(--amber); }
+  .stat-icon.blue svg { stroke: #3B82F6; }
+
+  /* ─── MAIN GRID ─── */
+  .main-grid { display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .card-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+  .card-sub { font-size: 12px; color: var(--gray-400); margin-top: 2px; }
+
+  /* ─── TABLE ─── */
+  .table-wrap { overflow-x: auto; }
+
+  table { width: 100%; border-collapse: collapse; }
+
+  thead th {
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--red-primary);
+    text-align: left;
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+  }
+
+  tbody tr { border-bottom: 1px solid var(--gray-100); transition: background .1s; }
+  tbody tr:hover { background: var(--gray-50); }
+  tbody tr:last-child { border-bottom: none; }
+
+  td { padding: 13px 16px; font-size: 13px; color: var(--gray-700); }
+
+  .td-name { font-weight: 600; color: var(--gray-900); }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge-green { background: var(--green-light); color: var(--green); }
+  .badge-red { background: var(--red-pale); color: var(--red-primary); }
+  .badge-amber { background: var(--amber-light); color: var(--amber); }
+  .badge-gray { background: var(--gray-100); color: var(--gray-500); }
+  .badge-blue { background: #EFF6FF; color: #3B82F6; }
+
+  .badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* ─── BIOMETRIC PANEL ─── */
+  .bio-panel { padding: 20px; }
+
+  .bio-scanner {
+    width: 140px;
+    height: 140px;
+    border-radius: 20px;
+    background: var(--red-pale);
+    border: 2px dashed var(--red-border);
+    margin: 0 auto 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .bio-scanner:hover { background: #FEE2E2; border-color: var(--red-primary); }
+
+  .bio-scanner.scanning {
+    border-style: solid;
+    border-color: var(--red-primary);
+    animation: scan-pulse 1.2s infinite;
+  }
+
+  .bio-scanner.success {
+    background: var(--green-light);
+    border-color: var(--green);
+    border-style: solid;
+    animation: none;
+  }
+
+  .bio-scanner.denied {
+    background: var(--red-pale);
+    border-color: var(--red-primary);
+    border-style: solid;
+    animation: shake .4s;
+  }
+
+  @keyframes scan-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(200,21,27,.3); }
+    50% { box-shadow: 0 0 0 12px rgba(200,21,27,0); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  .scan-line {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--red-primary);
+    animation: scanline 1.5s linear infinite;
+    display: none;
+  }
+
+  .bio-scanner.scanning .scan-line { display: block; }
+
+  @keyframes scanline {
+    0% { top: 0; }
+    100% { top: 100%; }
+  }
+
+  .bio-scanner svg { width: 48px; height: 48px; stroke: var(--red-primary); fill: none; stroke-width: 1.5; }
+  .bio-scanner.success svg { stroke: var(--green); }
+  .bio-scanner.denied svg { stroke: var(--red-primary); }
+  .bio-text { font-size: 12px; font-weight: 600; color: var(--red-primary); }
+  .bio-scanner.success .bio-text { color: var(--green); }
+
+  .bio-status-msg {
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  .bio-status-msg .status-name { font-size: 16px; font-weight: 700; color: var(--gray-900); }
+  .bio-status-msg .status-info { font-size: 12px; color: var(--gray-400); margin-top: 4px; }
+
+  .bio-actions { display: flex; gap: 8px; }
+
+  .btn {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
+  .btn-primary { background: var(--red-primary); color: var(--white); }
+  .btn-primary:hover { background: var(--red-dark); }
+  .btn-outline { background: var(--white); color: var(--gray-600); border: 1.5px solid var(--gray-200); }
+  .btn-outline:hover { background: var(--gray-50); border-color: var(--gray-300); }
+  .btn-green { background: var(--green); color: var(--white); }
+  .btn-green:hover { background: #15803D; }
+
+  .divider { height: 1px; background: var(--gray-100); margin: 16px 0; }
+
+  .recent-entries { }
+  .recent-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--gray-400); margin-bottom: 12px; }
+
+  .entry-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .entry-item:last-child { border-bottom: none; }
+
+  .entry-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--red-pale);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--red-primary);
+    flex-shrink: 0;
+  }
+
+  .entry-name { font-size: 13px; font-weight: 600; color: var(--gray-900); }
+  .entry-time { font-size: 11px; color: var(--gray-400); }
+  .entry-badge { margin-left: auto; }
+
+  /* ─── SEARCH BAR ─── */
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .search-input-wrap {
+    flex: 1;
+    position: relative;
+  }
+
+  .search-input-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    stroke: var(--gray-400);
+    fill: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px 12px 10px 38px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    background: var(--white);
+    color: var(--gray-900);
+    transition: border-color .15s;
+  }
+
+  .search-input:focus { border-color: var(--red-primary); }
+  .search-input::placeholder { color: var(--gray-400); }
+
+  .filter-btn {
+    padding: 10px 16px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    background: var(--white);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .15s;
+    font-family: inherit;
+  }
+
+  .filter-btn:hover { border-color: var(--red-primary); color: var(--red-primary); }
+  .filter-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+  .add-btn {
+    padding: 10px 16px;
+    background: var(--red-primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background .15s;
+    font-family: inherit;
+  }
+
+  .add-btn:hover { background: var(--red-dark); }
+  .add-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+
+  /* ─── MODAL ─── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.45);
+    backdrop-filter: blur(3px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--white);
+    border-radius: 16px;
+    width: 480px;
+    max-width: 95vw;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    animation: modal-in .2s ease;
+  }
+
+  @keyframes modal-in {
+    from { transform: scale(.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--gray-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close { background: none; border: none; cursor: pointer; padding: 4px; border-radius: 6px; color: var(--gray-400); transition: all .15s; }
+  .modal-close:hover { background: var(--gray-100); color: var(--gray-700); }
+  .modal-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; display: block; }
+
+  .modal-body { padding: 24px; }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  .form-label { font-size: 12px; font-weight: 600; color: var(--gray-600); }
+
+  .form-input, .form-select {
+    padding: 9px 12px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--gray-900);
+    outline: none;
+    background: var(--white);
+    transition: border-color .15s;
+  }
+
+  .form-input:focus, .form-select:focus { border-color: var(--red-primary); }
+
+  .bio-enroll-box {
+    border: 2px dashed var(--red-border);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    background: var(--red-pale);
+    cursor: pointer;
+    transition: all .2s;
+  }
+
+  .bio-enroll-box:hover { border-color: var(--red-primary); }
+  .bio-enroll-box svg { width: 36px; height: 36px; stroke: var(--red-primary); fill: none; margin-bottom: 8px; }
+  .bio-enroll-box p { font-size: 13px; font-weight: 600; color: var(--red-primary); }
+  .bio-enroll-box span { font-size: 12px; color: var(--gray-400); }
+
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--gray-100);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  .modal-footer .btn { flex: none; padding: 10px 20px; }
+
+  /* ─── REPORTS ─── */
+  .reports-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .report-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: all .2s;
+    border: 1.5px solid transparent;
+  }
+
+  .report-card:hover { border-color: var(--red-primary); transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+
+  .report-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    background: var(--red-pale);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+  }
+
+  .report-icon svg { width: 22px; height: 22px; stroke: var(--red-primary); fill: none; }
+  .report-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .report-card p { font-size: 12px; color: var(--gray-400); line-height: 1.5; }
+
+  /* ─── CHART PLACEHOLDER ─── */
+  .chart-placeholder {
+    height: 200px;
+    background: var(--gray-50);
+    border-radius: 10px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+    padding: 20px 20px 0;
+    overflow: hidden;
+  }
+
+  .chart-bar {
+    flex: 1;
+    border-radius: 6px 6px 0 0;
+    background: var(--red-primary);
+    opacity: .15;
+    transition: all .3s;
+    position: relative;
+  }
+
+  .chart-bar.active { opacity: 1; }
+  .chart-bar:hover { opacity: .7; }
+
+  .chart-label {
+    font-size: 10px;
+    color: var(--gray-400);
+    text-align: center;
+    margin-top: 6px;
+  }
+
+  .chart-wrap { padding: 20px; }
+
+  /* ─── CONFIGURACOES ─── */
+  .settings-grid { display: grid; grid-template-columns: 240px 1fr; gap: 20px; }
+
+  .settings-nav { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 8px; }
+
+  .settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    transition: all .15s;
+  }
+
+  .settings-nav-item:hover { background: var(--gray-50); color: var(--gray-900); }
+  .settings-nav-item.active { background: var(--red-pale); color: var(--red-primary); font-weight: 600; }
+  .settings-nav-item svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+
+  .settings-panel { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; }
+
+  .settings-section { margin-bottom: 28px; }
+  .settings-section:last-child { margin-bottom: 0; }
+  .settings-section h3 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .settings-section p { font-size: 12px; color: var(--gray-400); margin-bottom: 16px; }
+
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .toggle-row:last-child { border-bottom: none; }
+  .toggle-label { font-size: 13px; font-weight: 500; }
+  .toggle-sub { font-size: 12px; color: var(--gray-400); }
+
+  .toggle {
+    width: 40px;
+    height: 22px;
+    background: var(--gray-200);
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background .2s;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .toggle.on { background: var(--red-primary); }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    background: white;
+    border-radius: 50%;
+    transition: transform .2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+  }
+
+  .toggle.on::after { transform: translateX(18px); }
+
+  /* ─── PAGINATION ─── */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-top: 1px solid var(--gray-100);
+  }
+
+  .page-info { font-size: 12px; color: var(--gray-400); }
+
+  .page-btns { display: flex; gap: 4px; }
+
+  .page-btn {
+    width: 30px; height: 30px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: 6px;
+    background: var(--white);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-500);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+  }
+
+  .page-btn:hover { border-color: var(--red-primary); color: var(--red-primary); }
+  .page-btn.active { background: var(--red-primary); border-color: var(--red-primary); color: white; }
+  .page-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; }
+
+  /* ─── TOAST ─── */
+  .toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 999;
+  }
+
+  .toast {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-lg);
+    animation: toast-in .3s ease;
+    min-width: 260px;
+  }
+
+  @keyframes toast-in {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .toast-success { background: var(--green); color: white; }
+  .toast-error { background: var(--red-primary); color: white; }
+  .toast-info { background: var(--gray-900); color: white; }
+  .toast svg { width: 16px; height: 16px; stroke: currentColor; fill: none; }
+
+  /* ─── ACCESS LOG ─── */
+  .log-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .log-filter {
+    padding: 6px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-500);
+    transition: all .15s;
+  }
+
+  .log-filter.active { background: var(--red-primary); border-color: var(--red-primary); color: white; }
+  .log-filter:hover:not(.active) { border-color: var(--red-primary); color: var(--red-primary); }
+
+  .full-width { grid-column: 1 / -1; }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .page-header h2 { font-size: 18px; font-weight: 700; }
+  .page-header p { font-size: 13px; color: var(--gray-400); margin-top: 3px; }
+
+  .alert-bar {
+    background: var(--amber-light);
+    border: 1px solid #FDE68A;
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--amber);
+    font-weight: 500;
+  }
+
+  .alert-bar svg { width: 18px; height: 18px; stroke: currentColor; fill: none; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <div class="brand">FENYX</div>
+      <div class="sub">Acesso</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <a class="nav-item active" onclick="showView('dashboard')">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      Início
+    </a>
+    <a class="nav-item" onclick="showView('acessos')">
+      <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Acessos
+    </a>
+    <a class="nav-item" onclick="showView('visitantes')">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Visitantes
+    </a>
+
+    <div class="nav-section-label">Gestão</div>
+    <a class="nav-item" onclick="showView('relatorios')">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Relatórios
+    </a>
+    <a class="nav-item" onclick="showView('configuracoes')">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Configurações
+    </a>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="sidebar-user">
+      <div class="user-avatar">AD</div>
+      <div class="user-info">
+        <div class="name">Administrador</div>
+        <div class="role">Super Admin</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1 class="page-title" id="page-title">INÍCIO</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="clock-widget">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div>
+          <div class="clock-time" id="clock-time">--:--</div>
+          <div class="clock-date" id="clock-date">--/--/----</div>
+        </div>
+      </div>
+      <div class="biometric-status">
+        <div class="status-dot"></div>
+        Biométrico Ativo
+      </div>
+      <div class="notif-btn" onclick="showToast('3 alertas de acesso pendentes', 'info')">
+        <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="notif-badge">3</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ── VIEW: DASHBOARD ── -->
+    <div class="view active" id="view-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon red">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <div class="stat-label">Total Cadastrados</div>
+          <div class="stat-value">248</div>
+          <div class="stat-sub">+12 este mês</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon green">
+            <svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          </div>
+          <div class="stat-label">Entradas Hoje</div>
+          <div class="stat-value">74</div>
+          <div class="stat-sub">Último: 14:25</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-icon amber">
+            <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div class="stat-label">Acessos Negados</div>
+          <div class="stat-value">3</div>
+          <div class="stat-sub">Requer atenção</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-icon blue">
+            <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+          </div>
+          <div class="stat-label">Visitantes Ativos</div>
+          <div class="stat-value">11</div>
+          <div class="stat-sub">No local agora</div>
+        </div>
+      </div>
+
+      <div class="main-grid">
+        <!-- Log de acessos -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Log de Acessos Recentes</div>
+              <div class="card-sub">Atualizado em tempo real via biométrico</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="filter-btn" onclick="showToast('Exportando relatório...', 'info')">
+                <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Exportar
+              </button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Documento</th>
+                  <th>Tipo</th>
+                  <th>Entrada</th>
+                  <th>Saída</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-table">
+                <!-- JS popula -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Painel biométrico -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Leitor Biométrico</div>
+          </div>
+          <div class="bio-panel">
+            <div class="bio-scanner" id="bio-scanner" onclick="triggerScan()">
+              <div class="scan-line"></div>
+              <svg viewBox="0 0 64 64" id="bio-icon">
+                <rect x="8" y="8" width="12" height="4" rx="2" fill="none" stroke-width="2"/>
+                <rect x="8" y="8" width="4" height="12" rx="2" fill="none" stroke-width="2"/>
+                <rect x="44" y="8" width="12" height="4" rx="2" fill="none" stroke-width="2"/>
+                <rect x="52" y="8" width="4" height="12" rx="2" fill="none" stroke-width="2"/>
+                <rect x="8" y="52" width="12" height="4" rx="2" fill="none" stroke-width="2"/>
+                <rect x="8" y="44" width="4" height="12" rx="2" fill="none" stroke-width="2"/>
+                <rect x="44" y="52" width="12" height="4" rx="2" fill="none" stroke-width="2"/>
+                <rect x="52" y="44" width="4" height="12" rx="2" fill="none" stroke-width="2"/>
+                <path d="M32 20c-4.4 0-8 3.6-8 8 0 4 2.4 7.4 6 8.8V44h4V36.8c3.6-1.4 6-4.8 6-8.8 0-4.4-3.6-8-8-8z" fill="none" stroke-width="2"/>
+                <line x1="28" y1="44" x2="36" y2="44" stroke-width="2"/>
+              </svg>
+              <span class="bio-text">Toque para escanear</span>
+            </div>
+
+            <div class="bio-status-msg">
+              <div class="status-name" id="bio-name">Aguardando leitura</div>
+              <div class="status-info" id="bio-info">Posicione o dedo no sensor biométrico</div>
+            </div>
+
+            <div class="bio-actions">
+              <button class="btn btn-primary" onclick="triggerScan()">
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                Escanear
+              </button>
+              <button class="btn btn-outline" onclick="resetScanner()">
+                <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+                Resetar
+              </button>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="recent-entries">
+              <div class="recent-title">Últimas Entradas</div>
+              <div id="recent-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: ACESSOS ── -->
+    <div class="view" id="view-acessos">
+      <div class="page-header">
+        <div>
+          <h2>Registro de Acessos</h2>
+          <p>Histórico completo de entradas e saídas</p>
+        </div>
+        <button class="add-btn" onclick="showToast('Exportando para Excel...', 'info')">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Exportar
+        </button>
+      </div>
+
+      <div class="log-filters">
+        <button class="log-filter active">Todos</button>
+        <button class="log-filter">Alunos</button>
+        <button class="log-filter">Funcionários</button>
+        <button class="log-filter">Visitantes</button>
+        <button class="log-filter">Negados</button>
+        <button class="log-filter">Hoje</button>
+        <button class="log-filter">Esta semana</button>
+      </div>
+
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-input" type="text" placeholder="Pesquisar por nome, documento ou turma...">
+        </div>
+        <button class="filter-btn">
+          <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+          Filtros
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Documento</th>
+                <th>Tipo</th>
+                <th>Turma/Setor</th>
+                <th>Entrada</th>
+                <th>Saída</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="acessos-table"></tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span class="page-info">Mostrando 1–10 de 248 registros</span>
+          <div class="page-btns">
+            <button class="page-btn"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">…</button>
+            <button class="page-btn">25</button>
+            <button class="page-btn"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: VISITANTES ── -->
+    <div class="view" id="view-visitantes">
+      <div class="page-header">
+        <div>
+          <h2>Cadastro de Visitantes</h2>
+          <p>Gerencie visitantes com acesso temporário</p>
+        </div>
+        <button class="add-btn" onclick="openModal()">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Novo Visitante
+        </button>
+      </div>
+
+      <div class="alert-bar">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        3 visitantes com permanência superior a 4 horas. Verificação recomendada.
+      </div>
+
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input class="search-input" type="text" placeholder="Pesquisar visitante...">
+        </div>
+        <button class="filter-btn">
+          <svg viewBox="0 0 24 24"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+          Filtros
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Documento</th>
+                <th>Destino</th>
+                <th>Responsável</th>
+                <th>Entrada</th>
+                <th>Situação</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="visitantes-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: RELATÓRIOS ── -->
+    <div class="view" id="view-relatorios">
+      <div class="page-header">
+        <div>
+          <h2>Relatórios e Análises</h2>
+          <p>Visão gerencial do controle de acesso</p>
+        </div>
+        <button class="add-btn" onclick="showToast('Gerando relatório PDF...', 'info')">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Gerar PDF
+        </button>
+      </div>
+
+      <div class="reports-grid">
+        <div class="report-card" onclick="showToast('Relatório de Frequência gerado!', 'success')">
+          <div class="report-icon"><svg viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div>
+          <h3>Frequência Diária</h3>
+          <p>Entradas e saídas por período com gráfico de tendência</p>
+        </div>
+        <div class="report-card" onclick="showToast('Relatório de Ocorrências gerado!', 'success')">
+          <div class="report-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg></div>
+          <h3>Acessos Negados</h3>
+          <p>Tentativas bloqueadas com dados de identificação</p>
+        </div>
+        <div class="report-card" onclick="showToast('Relatório de Visitantes gerado!', 'success')">
+          <div class="report-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+          <h3>Visitas Externas</h3>
+          <p>Histórico de visitantes com tempo de permanência</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Fluxo de Acesso — Últimos 7 dias</div>
+            <div class="card-sub">Total de entradas por dia</div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-placeholder" id="chart">
+            <!-- JS popula -->
+          </div>
+          <div style="display:flex;gap:12px;margin-top:8px;justify-content:center;" id="chart-labels"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: CONFIGURAÇÕES ── -->
+    <div class="view" id="view-configuracoes">
+      <div class="page-header">
+        <div>
+          <h2>Configurações</h2>
+          <p>Parâmetros do sistema e do leitor biométrico</p>
+        </div>
+      </div>
+
+      <div class="settings-grid">
+        <div class="settings-nav">
+          <div class="settings-nav-item active">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            Geral
+          </div>
+          <div class="settings-nav-item">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Biométrico
+          </div>
+          <div class="settings-nav-item">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            Notificações
+          </div>
+          <div class="settings-nav-item">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+            Segurança
+          </div>
+          <div class="settings-nav-item">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            Backup
+          </div>
+        </div>
+
+        <div class="settings-panel">
+          <div class="settings-section">
+            <h3>Configurações do Sistema</h3>
+            <p>Parâmetros gerais de operação do Fenyx Acesso</p>
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Leitor Biométrico</div>
+                <div class="toggle-sub">Ativar/desativar o sensor principal</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Registro Automático de Saída</div>
+                <div class="toggle-sub">Registrar saída automaticamente após X horas</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Alertas de Acesso Negado</div>
+                <div class="toggle-sub">Notificar administrador em tempo real</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Modo Dupla Verificação</div>
+                <div class="toggle-sub">Exigir biometria + crachá para acesso</div>
+              </div>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label">Som de Confirmação</div>
+                <div class="toggle-sub">Beep sonoro ao registrar acesso</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;gap:10px;padding-top:16px;border-top:1px solid var(--gray-100);">
+            <button class="btn btn-outline" style="flex:none;padding:10px 20px;">Cancelar</button>
+            <button class="btn btn-primary" style="flex:none;padding:10px 20px;" onclick="showToast('Configurações salvas!', 'success')">Salvar Alterações</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL: Novo Visitante -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Cadastrar Visitante</div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Nome Completo</label>
+          <input class="form-input" type="text" placeholder="Nome do visitante">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CPF / RG</label>
+          <input class="form-input" type="text" placeholder="000.000.000-00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telefone</label>
+          <input class="form-input" type="text" placeholder="(00) 00000-0000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Destino</label>
+          <input class="form-input" type="text" placeholder="Sala, setor ou pessoa">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Responsável</label>
+          <input class="form-input" type="text" placeholder="Quem autoriza a visita">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Biometria Digital (opcional)</label>
+          <div class="bio-enroll-box" onclick="showToast('Ative o sensor para capturar biometria', 'info')">
+            <svg viewBox="0 0 64 64">
+              <rect x="8" y="8" width="12" height="4" rx="2" fill="none" stroke-width="2"/>
+              <rect x="8" y="8" width="4" height="12" rx="2" fill="none" stroke-width="2"/>
+              <rect x="44" y="8" width="12" height="4" rx="2" fill="none" stroke-width="2"/>
+              <rect x="52" y="8" width="4" height="12" rx="2" fill="none" stroke-width="2"/>
+              <rect x="8" y="52" width="12" height="4" rx="2" fill="none" stroke-width="2"/>
+              <rect x="8" y="44" width="4" height="12" rx="2" fill="none" stroke-width="2"/>
+              <rect x="44" y="52" width="12" height="4" rx="2" fill="none" stroke-width="2"/>
+              <rect x="52" y="44" width="4" height="12" rx="2" fill="none" stroke-width="2"/>
+              <path d="M32 20c-4.4 0-8 3.6-8 8 0 4 2.4 7.4 6 8.8V44h4V36.8c3.6-1.4 6-4.8 6-8.8 0-4.4-3.6-8-8-8z" fill="none" stroke-width="2"/>
+            </svg>
+            <p>Capturar Biometria</p>
+            <span>Clique e posicione o dedo no sensor</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveVisitor()">
+        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Cadastrar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toasts"></div>
+
+<script>
+// ─── DATA ───
+const people = [
+  { nome: 'Guilherme', doc: '125034439', tipo: 'Aluno', turma: '3º A', entrada: '14:25', saida: '—', status: 'presente' },
+  { nome: 'Mariana', doc: 'RA-2024-881', tipo: 'Aluno', turma: '3º A', entrada: '14:24', saida: '—', status: 'presente' },
+  { nome: 'Mel', doc: 'RA-2024-345', tipo: 'Aluno', turma: '3º A', entrada: '14:23', saida: '—', status: 'presente' },
+  { nome: 'Gabriel', doc: 'RA-2023-099', tipo: 'Aluno', turma: '3º A', entrada: '14:22', saida: '—', status: 'presente' },
+  { nome: 'Melissa', doc: 'RA-2024-211', tipo: 'Aluno', turma: '3º A', entrada: '14:21', saida: '14:50', status: 'saiu' },
+  { nome: 'João F.', doc: 'RA-2023-774', tipo: 'Aluno', turma: '3º A', entrada: '14:20', saida: '14:45', status: 'saiu' },
+  { nome: 'Prof. Ana', doc: 'FP-004', tipo: 'Funcionário', turma: 'Sala 101', entrada: '07:30', saida: '—', status: 'presente' },
+  { nome: 'Carlos R.', doc: '987654321', tipo: 'Aluno', turma: '2º B', entrada: '13:55', saida: '—', status: 'presente' },
+  { nome: 'Desconhecido', doc: '—', tipo: '—', turma: '—', entrada: '13:40', saida: '—', status: 'negado' },
+  { nome: 'Sandra Lima', doc: 'VIS-089', tipo: 'Visitante', turma: 'Diretoria', entrada: '10:00', saida: '—', status: 'presente' },
+];
+
+const visitors = [
+  { nome: 'Roberto Alves', doc: '321.654.987-00', destino: 'Diretoria', resp: 'Dir. Fernanda', entrada: '09:10', status: 'no local' },
+  { nome: 'Camila Torres', doc: '456.789.123-00', destino: 'Sala 203', resp: 'Prof. André', entrada: '10:30', status: 'no local' },
+  { nome: 'Felipe Nunes', doc: '789.123.456-00', destino: 'Secretaria', resp: 'Fernanda M.', entrada: '08:00', status: 'saiu' },
+  { nome: 'Sandra Lima', doc: '234.567.890-00', destino: 'Diretoria', resp: 'Dir. Fernanda', entrada: '10:00', status: 'no local' },
+];
+
+const scanNames = [
+  { nome: 'Lucas Andrade', info: 'Aluno — 2º B • ID 2023-112' },
+  { nome: 'Fernanda Costa', info: 'Funcionário — Secretaria • ID FP-009' },
+  { nome: 'Rafael Souza', info: 'Aluno — 1º A • ID 2024-457' },
+  { nome: 'Beatriz Melo', info: 'Aluno — 3º B • ID 2024-033' },
+];
+
+let scanIdx = 0;
+let scanState = 'idle';
+
+// ─── RENDER TABLES ───
+function statusBadge(s) {
+  const map = {
+    presente: `<span class="badge badge-green"><span class="badge-dot"></span>Presente</span>`,
+    saiu: `<span class="badge badge-gray"><span class="badge-dot"></span>Saiu</span>`,
+    negado: `<span class="badge badge-red"><span class="badge-dot"></span>Negado</span>`,
+    'no local': `<span class="badge badge-green"><span class="badge-dot"></span>No local</span>`,
+  };
+  return map[s] || `<span class="badge badge-gray">${s}</span>`;
+}
+
+function renderDashboard() {
+  const tb = document.getElementById('dashboard-table');
+  tb.innerHTML = people.slice(0,8).map(p => `
+    <tr>
+      <td class="td-name">${p.nome}</td>
+      <td>${p.doc}</td>
+      <td><span class="badge ${p.tipo==='Aluno'?'badge-blue':p.tipo==='Funcionário'?'badge-amber':'badge-gray'}">${p.tipo}</span></td>
+      <td>${p.turma}</td>
+      <td>${p.entrada}</td>
+      <td>${p.status==='negado'?'<span style="color:var(--red-primary);font-weight:600">—</span>':p.saida}</td>
+      <td>${statusBadge(p.status)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderAcessos() {
+  const tb = document.getElementById('acessos-table');
+  tb.innerHTML = people.map(p => `
+    <tr>
+      <td class="td-name">${p.nome}</td>
+      <td>${p.doc}</td>
+      <td><span class="badge ${p.tipo==='Aluno'?'badge-blue':p.tipo==='Funcionário'?'badge-amber':'badge-gray'}">${p.tipo}</span></td>
+      <td>${p.turma}</td>
+      <td>${p.entrada}</td>
+      <td>${p.saida}</td>
+      <td>${statusBadge(p.status)}</td>
+    </tr>
+  `).join('');
+}
+
+function renderVisitantes() {
+  const tb = document.getElementById('visitantes-table');
+  tb.innerHTML = visitors.map(v => `
+    <tr>
+      <td class="td-name">${v.nome}</td>
+      <td>${v.doc}</td>
+      <td>${v.destino}</td>
+      <td>${v.resp}</td>
+      <td>${v.entrada}</td>
+      <td>${statusBadge(v.status)}</td>
+      <td>
+        <button class="filter-btn" style="padding:5px 10px;font-size:12px;" onclick="showToast('Saída registrada para ${v.nome}', 'success')">Registrar Saída</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderRecent() {
+  const el = document.getElementById('recent-list');
+  el.innerHTML = people.slice(0,4).map(p => `
+    <div class="entry-item">
+      <div class="entry-avatar">${p.nome[0]}</div>
+      <div>
+        <div class="entry-name">${p.nome}</div>
+        <div class="entry-time">${p.entrada} · ${p.tipo}</div>
+      </div>
+      <div class="entry-badge">${statusBadge(p.status)}</div>
+    </div>
+  `).join('');
+}
+
+function renderChart() {
+  const data = [52, 67, 45, 78, 83, 61, 74];
+  const labels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+  const max = Math.max(...data);
+  const chart = document.getElementById('chart');
+  const labelsEl = document.getElementById('chart-labels');
+  chart.innerHTML = data.map((v, i) => `
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;">
+      <div class="chart-bar ${i===6?'active':''}" style="height:${(v/max)*160}px;width:100%;background:${i===6?'var(--red-primary)':'var(--gray-300)'}"></div>
+      <div class="chart-label">${v}</div>
+    </div>
+  `).join('');
+  labelsEl.innerHTML = labels.map(l => `<span style="flex:1;text-align:center;font-size:11px;color:var(--gray-400)">${l}</span>`).join('');
+}
+
+// ─── CLOCK ───
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock-time').textContent =
+    now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('clock-date').textContent =
+    now.toLocaleDateString('pt-BR');
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── NAVIGATION ───
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  const titles = { dashboard: 'INÍCIO', acessos: 'ACESSOS', visitantes: 'VISITANTES', relatorios: 'RELATÓRIOS', configuracoes: 'CONFIGURAÇÕES' };
+  document.getElementById('page-title').textContent = titles[name] || name.toUpperCase();
+  event.currentTarget && event.currentTarget.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes(name)) n.classList.add('active');
+  });
+}
+
+// ─── LOG FILTERS ───
+document.querySelectorAll('.log-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.closest('.log-filters').querySelectorAll('.log-filter').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+// ─── SETTINGS NAV ───
+document.querySelectorAll('.settings-nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.settings-nav-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+
+// ─── BIOMETRIC SCANNER ───
+function triggerScan() {
+  if (scanState === 'scanning') return;
+  scanState = 'scanning';
+  const scanner = document.getElementById('bio-scanner');
+  const nameEl = document.getElementById('bio-name');
+  const infoEl = document.getElementById('bio-info');
+
+  scanner.className = 'bio-scanner scanning';
+  nameEl.textContent = 'Lendo biometria...';
+  infoEl.textContent = 'Aguarde o processamento';
+
+  const deny = Math.random() < 0.15;
+
+  setTimeout(() => {
+    if (deny) {
+      scanner.className = 'bio-scanner denied';
+      nameEl.textContent = 'Acesso Negado';
+      infoEl.textContent = 'Biometria não reconhecida';
+      showToast('Acesso negado — biometria não cadastrada', 'error');
+    } else {
+      const person = scanNames[scanIdx % scanNames.length];
+      scanIdx++;
+      scanner.className = 'bio-scanner success';
+      nameEl.textContent = person.nome;
+      infoEl.textContent = person.info;
+      showToast(`Acesso liberado — ${person.nome}`, 'success');
+    }
+    scanState = 'done';
+    setTimeout(() => resetScanner(), 3000);
+  }, 1800);
+}
+
+function resetScanner() {
+  scanState = 'idle';
+  const scanner = document.getElementById('bio-scanner');
+  const nameEl = document.getElementById('bio-name');
+  const infoEl = document.getElementById('bio-info');
+  scanner.className = 'bio-scanner';
+  nameEl.textContent = 'Aguardando leitura';
+  infoEl.textContent = 'Posicione o dedo no sensor biométrico';
+}
+
+// ─── MODAL ───
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+function saveVisitor() {
+  closeModal();
+  showToast('Visitante cadastrado com sucesso!', 'success');
+}
+
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ─── TOAST ───
+function showToast(msg, type = 'info') {
+  const icons = {
+    success: '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+    error: '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+    info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+  };
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = icons[type] + msg;
+  document.getElementById('toasts').appendChild(toast);
+  setTimeout(() => toast.remove(), 3500);
+}
+
+// ─── INIT ───
+renderDashboard();
+renderAcessos();
+renderVisitantes();
+renderRecent();
+renderChart();
+</script>
+</body>
+</html>
